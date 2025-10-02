@@ -77,4 +77,3 @@ if not dead_stock_df.empty:
     fig3 = px.pie(dead_stock_df, values="Stock", names="Item Name",
                   title="Dead Stock Breakdown")
     st.plotly_chart(fig3, use_container_width=True)
-```
