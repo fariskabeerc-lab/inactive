@@ -6,7 +6,7 @@ import plotly.express as px
 st.set_page_config(page_title="Inactive Items Dashboard", layout="wide")
 
 # --- Load Data ---
-file_path = "Active and Inactive Items Report.xlsx"  # replace with your file name
+file_path = "Active and Inactive Items Report.xlsx"  # replace with your actual file name
 df = pd.read_excel(file_path)
 
 # --- Clean Columns ---
@@ -15,46 +15,56 @@ df.columns = df.columns.str.strip()
 # --- Calculations ---
 df["Unsold_Value"] = df["Stock"] * df["Cost Price"]
 
-# --- Insights Title ---
+# --- Filter: low sold but high stock ---
+df_inactive = df.sort_values(by=["Qty Sold", "Stock"], ascending=[True, False]).head(30)
+
+# --- KPI / Big Insights ---
+total_unsold_value = df["Unsold_Value"].sum()
+top30_unsold_value = df_inactive["Unsold_Value"].sum()
+completely_unsold = df[df["Qty Sold"] == 0].shape[0]
+
 st.title("📊 Inactive Items (September)")
 
-# --- Show Key Metrics ---
-total_unsold_value = df["Unsold_Value"].sum()
-low_selling_items = df[df["Qty Sold"] == 0].shape[0]
+col1, col2, col3 = st.columns(3)
+col1.metric("💰 Total Unsold Value", f"{total_unsold_value:,.2f}")
+col2.metric("📦 Completely Unsold Items", f"{completely_unsold}")
+col3.metric("🔥 Unsold Value (Top 30 Low-Sold High-Stock)", f"{top30_unsold_value:,.2f}")
 
-st.markdown(f"""
-### Key Insights:
-- 💰 **Total Value of Unsold Stock:** {total_unsold_value:,.2f}
-- 📦 **Completely Unsold Items:** {low_selling_items}
-- 🛑 Focus on these items for clearance or better marketing.
-""")
+st.markdown("---")
 
-# --- Horizontal Bar Chart (Top Low Selling Items) ---
-top_low = df.sort_values(by="Qty Sold", ascending=True).head(15)  # 15 lowest sellers
-
+# --- Horizontal Bar Chart ---
 fig = px.bar(
-    top_low,
-    x="Qty Sold",
+    df_inactive,
+    x="Stock",
     y="Item Name",
     orientation="h",
     text="Qty Sold",
-    title="🚨 Lowest Selling Items (September)",
-    color="Qty Sold",
-    color_continuous_scale="Reds"
+    title="🚨 Top 30 Low-Selling Items with High Stock",
+    color="Unsold_Value",
+    color_continuous_scale="Reds",
+    hover_data={
+        "Stock": True,
+        "Qty Sold": True,
+        "Cost Price": True,
+        "Unsold_Value": True,
+        "Item Name": False,  # already shown on y-axis
+    }
 )
 
-# Better readability
+# Layout improvements
 fig.update_layout(
     yaxis=dict(title="Item", automargin=True),
-    xaxis=dict(title="Quantity Sold"),
+    xaxis=dict(title="Stock (Units)"),
     plot_bgcolor="white",
-    margin=dict(l=120, r=20, t=60, b=40)
+    margin=dict(l=150, r=20, t=60, b=40)
 )
 
-fig.update_traces(textposition="outside")
+fig.update_traces(texttemplate="Sold: %{text}", textposition="outside")
 
 st.plotly_chart(fig, use_container_width=True)
 
-# --- Show Table for Reference ---
-st.subheader("📋 Data Table of Lowest Sellers")
-st.dataframe(top_low[["Item Code", "Item Name", "Qty Sold", "Stock", "Unsold_Value"]])
+# --- Table for reference ---
+st.subheader("📋 Data Table (Top 30 Inactive Items)")
+st.dataframe(
+    df_inactive[["Item Code", "Item Name", "Stock", "Qty Sold", "Cost Price", "Unsold_Value"]]
+)
