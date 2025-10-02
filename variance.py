@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from st_aggrid import AgGrid, GridOptionsBuilder
+from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
 
 # --- Page Config ---
 st.set_page_config(page_title="Inactive Items Dashboard", layout="wide", page_icon="📊")
@@ -67,7 +67,7 @@ fig.update_traces(texttemplate="Sold: %{text}", textposition="outside")
 
 st.plotly_chart(fig, use_container_width=True)
 
-# --- Interactive Table for Top 30 ---
+# --- Interactive Dark Table for Top 30 ---
 st.subheader("📋 Top 30 Inactive Items (Interactive)")
 
 gb_top30 = GridOptionsBuilder.from_dataframe(
@@ -83,10 +83,10 @@ AgGrid(
     height=400,
     width='100%',
     allow_unsafe_jscode=True,
-    theme='dark'
+    theme='dark'  # ✅ dark background
 )
 
-# --- Interactive Table for Full Dataset ---
+# --- Interactive Dark Table for Full Dataset ---
 st.subheader("📂 Full Dataset (Interactive)")
 
 gb_full = GridOptionsBuilder.from_dataframe(df)
@@ -100,5 +100,5 @@ AgGrid(
     height=400,
     width='100%',
     allow_unsafe_jscode=True,
-    theme='dark'
+    theme='dark'  # ✅ dark background
 )
