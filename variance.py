@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from st_aggrid import AgGrid, GridOptionsBuilder
 
 # --- Page Config ---
 st.set_page_config(page_title="Inactive Items Dashboard", layout="wide", page_icon="📊")
@@ -50,10 +51,9 @@ fig = px.bar(
         "Unsold_Value": True,
         "Item Name": False
     },
-    template="plotly_dark"  # Dark theme
+    template="plotly_dark"
 )
 
-# Improve layout and readability
 fig.update_layout(
     yaxis=dict(title="Item", automargin=True),
     xaxis=dict(title="Stock (Units)"),
@@ -67,10 +67,34 @@ fig.update_traces(texttemplate="Sold: %{text}", textposition="outside")
 
 st.plotly_chart(fig, use_container_width=True)
 
-# --- Table for Top 30 ---
-st.subheader("📋 Top 30 Inactive Items Details")
-st.dataframe(df_inactive[["Item Code", "Item Name", "Stock", "Qty Sold", "Cost Price", "Unsold_Value"]])
+# --- Interactive Table for Top 30 ---
+st.subheader("📋 Top 30 Inactive Items (Interactive)")
+gb_top30 = GridOptionsBuilder.from_dataframe(df_inactive[["Item Code", "Item Name", "Stock", "Qty Sold", "Cost Price", "Unsold_Value"]])
+gb_top30.configure_default_column(sortable=True, filter=True, resizable=True)
+gb_top30.configure_grid_options(enableRangeSelection=True)
+gridOptions_top30 = gb_top30.build()
 
-# --- Full Dataset at the End ---
-st.subheader("📂 Full Dataset")
-st.dataframe(df)
+AgGrid(
+    df_inactive[["Item Code", "Item Name", "Stock", "Qty Sold", "Cost Price", "Unsold_Value"]],
+    gridOptions=gridOptions_top30,
+    height=400,
+    width='100%',
+    allow_unsafe_jscode=True,
+    theme='dark'
+)
+
+# --- Interactive Table for Full Dataset ---
+st.subheader("📂 Full Dataset (Interactive)")
+gb_full = GridOptionsBuilder.from_dataframe(df)
+gb_full.configure_default_column(sortable=True, filter=True, resizable=True)
+gb_full.configure_grid_options(enableRangeSelection=True)
+gridOptions_full = gb_full.build()
+
+AgGrid(
+    df,
+    gridOptions=gridOptions_full,
+    height=400,
+    width='100%',
+    allow_unsafe_jscode=True,
+    theme='dark'
+)
