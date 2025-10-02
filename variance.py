@@ -26,7 +26,7 @@ completely_unsold = df[df["Qty Sold"] == 0].shape[0]
 
 st.title("📊 Inactive Items Dashboard - September")
 
-# Big KPI cards
+# --- Big KPI cards ---
 col1, col2, col3 = st.columns(3)
 col1.metric("💰 Total Unsold Value", f"{total_unsold_value:,.2f}")
 col2.metric("📦 Completely Unsold Items", f"{completely_unsold}")
@@ -69,7 +69,10 @@ st.plotly_chart(fig, use_container_width=True)
 
 # --- Interactive Table for Top 30 ---
 st.subheader("📋 Top 30 Inactive Items (Interactive)")
-gb_top30 = GridOptionsBuilder.from_dataframe(df_inactive[["Item Code", "Item Name", "Stock", "Qty Sold", "Cost Price", "Unsold_Value"]])
+
+gb_top30 = GridOptionsBuilder.from_dataframe(
+    df_inactive[["Item Code", "Item Name", "Stock", "Qty Sold", "Cost Price", "Unsold_Value"]]
+)
 gb_top30.configure_default_column(sortable=True, filter=True, resizable=True)
 gb_top30.configure_grid_options(enableRangeSelection=True)
 gridOptions_top30 = gb_top30.build()
@@ -85,6 +88,7 @@ AgGrid(
 
 # --- Interactive Table for Full Dataset ---
 st.subheader("📂 Full Dataset (Interactive)")
+
 gb_full = GridOptionsBuilder.from_dataframe(df)
 gb_full.configure_default_column(sortable=True, filter=True, resizable=True)
 gb_full.configure_grid_options(enableRangeSelection=True)
